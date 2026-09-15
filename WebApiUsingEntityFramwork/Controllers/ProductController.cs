@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Caching.Memory;
 using System.Threading.Tasks;
 using WebApiUsingEntityFramwork.Model;
@@ -47,7 +48,11 @@ namespace WebApiUsingEntityFramwork.Controllers
             //        ImageUrl = image
             //    });
             //}
+
             int result=await productAsync.AddNewProduct(prod);
+            _productService.Remove("all_products");
+            _productService.RemoveDistributedCaching("all_productsditributed");
+        
             return Ok(result);
 
 
@@ -92,5 +97,41 @@ namespace WebApiUsingEntityFramwork.Controllers
 
             return Ok(products);
         }
+        [HttpGet("GetAllProductsByDistributedCaching")]
+        public async Task<IActionResult> GetAllProductsDistributedCatch()
+        {
+            //var result=await productAsync.GetAllProducts();
+            //   return Ok(result);
+
+            var products = await _productService.GetProducsServiceDistributedCaching();
+
+            return Ok(products);
+        }
+        [HttpGet("GetAllProductsByResponseCaching")]
+        [ResponseCache(
+    Duration = 60,
+    Location = ResponseCacheLocation.Any)]
+        //[ResponseCache(Duration = 60)]  //means the response can be cached for 60 seconds.
+        public async Task<IActionResult> GetAllProductsByResponseCaching()
+        {
+            //var result=await productAsync.GetAllProducts();
+            //   return Ok(result);
+
+            var products = await productAsync.GetAllProducts();
+
+            return Ok(products);
+        }
+        //[HttpGet("GetAllProductsByOutPutCaching")]   dot net version 7 or greater
+        //[OutputCache(Duration = 60)]
+        ////[ResponseCache(Duration = 60)]  //means the response can be cached for 60 seconds.
+        //public async Task<IActionResult> GetAllProductsByOutPutCaching()
+        //{
+        //    //var result=await productAsync.GetAllProducts();
+        //    //   return Ok(result);
+
+        //    var products = await productAsync.GetAllProducts();
+
+        //    return Ok(products);
+        //}
     }
 }
